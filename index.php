@@ -16,6 +16,7 @@
   // include alL controller here
   require 'controllers/AuthController.php';
   require 'controllers/HomeController.php';
+  require 'controllers/StudentController.php';
 
 
   //create db connection
@@ -38,57 +39,34 @@
   // get method
   $method = $act[1];
 
-  switch ($controller) {
-      case 'AuthController':
-          $ctrl = new AuthController();
-          switch ($method) {
-              case 'login':
-                  $ctrl->login();
-                  break;
-              case 'register':
-                  $ctrl->register();
-                  break;
-          }
-          break;
+  try {
+    /**
+     * Dynamic instance class
+     * It's same new ClassName()
+     * Hoverer, if "ClassName" is value in a variable we need to implement like below
+     */
 
-      case 'HomeController':
-          $ctrl = new HomeController();
-          switch ($method) {
-              case 'index':
-                  $ctrl->index();
-                  break;
-          }
-          break;
+    // create a ReflectionClass to get info of a class
+    $ref = new ReflectionClass($controller);
+
+    // create new instance of a class
+    $instance = $ref->newInstance();
+
+    // new  <ClassName>()
+    // AuthController => new AuthController()
+
+    // check method exists in controller class
+    if(method_exists($controller, $method)) {
+      // dynamic call method with method name is a variable
+      $instance->$method();
+    } else {
+      // throw error if method not found in controller
+      throw new Exception("Method $method not found in $controller");
+    }
+
+  } catch (ReflectionException $e) {
+    die("Controller $controller not found!");
+
+  } catch (Exception $e) {
+    die($e->getMessage());
   }
-
-//  try {
-//    /**
-//     * Dynamic instance class
-//     * It's same new ClassName()
-//     * Hoverer, if "ClassName" is value in a variable we need to implement like below
-//     */
-//
-//    // create a ReflectionClass to get info of a class
-//    $ref = new ReflectionClass($controller);
-//
-//    // create new instance of a class
-//    $instance = $ref->newInstance();
-//
-//    // new  <ClassName>()
-//    // AuthController => new AuthController()
-//
-//    // check method exists in controller class
-//    if(method_exists($controller, $method)) {
-//      // dynamic call method with method name is a variable
-//      $instance->$method();
-//    } else {
-//      // throw error if method not found in controller
-//      throw new Exception("Method $method not found in $controller");
-//    }
-//
-//  } catch (ReflectionException $e) {
-//    die("Controller $controller not found!");
-//
-//  } catch (Exception $e) {
-//    die($e->getMessage());
-//  }
